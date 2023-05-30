@@ -1,0 +1,14 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.container{
+    width: 100%;
+    text-align: center;
+    margin-top: 3em;
+}
+
+
+body{
+    background-color: lightslategray;
+}
