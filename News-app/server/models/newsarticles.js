@@ -1,9 +1,10 @@
+
 'use strict';
 const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class newsArticles extends Model {
+  class Articles extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,29 +14,26 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  newsArticles.init({
-    title: DataTypes.STRING,
-    author: DataTypes.STRING,
-    published_date: DataTypes.DATE,
-    published_date_precision: DataTypes.STRING,
-    link: DataTypes.STRING,
-    clean_url: DataTypes.STRING,
-    excerpt: DataTypes.STRING,
-    summary: DataTypes.STRING,
-    rights: DataTypes.STRING,
-    rank: DataTypes.INTEGER,
-    topic: DataTypes.STRING,
-    country: DataTypes.STRING,
-    language: DataTypes.STRING,
-    authors: DataTypes.STRING,
-    media: DataTypes.STRING,
-    is_opinion: DataTypes.BOOLEAN,
-    twitter_account: DataTypes.STRING,
-    _score: DataTypes.FLOAT,
-    _id: DataTypes.STRING
+  Articles.init({
+    articlesId:{
+      type:DataTypes.SMALLINT,
+      primaryKey:true,
+      autoIncrement:true,
+      field: "articles_id"
+    },
+    title: article.title,
+    author: article.author,
+    description: article.description,
+    content: article.content,
+    url: article.url,
+    urlToImage: article.urlToImage,
+    source: article.source,
+    publishedAt: article.publishedAt
   }, {
     sequelize,
-    modelName: 'newsArticles',
+    modelName: 'articles',
+    tableName: 'articles',
+    underscored:true
   });
-  return newsArticles;
+  return Articles;
 };

@@ -2,81 +2,52 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('newsArticles', {
-      id: {
+    await queryInterface.createTable('articles', {
+      articlesId: {
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+        primaryKey:true,
+        field:"articles_id",
+        type:Sequelize.INTEGER
+
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       author: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true,
       },
-      published_date: {
-        type: Sequelize.DATE
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
-      published_date_precision: {
-        type: Sequelize.STRING
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
-      link: {
-        type: Sequelize.STRING
-      },
-      clean_url: {
-        type: Sequelize.STRING
-      },
-      excerpt: {
-        type: Sequelize.STRING
-      },
-      summary: {
-        type: Sequelize.STRING
-      },
-      rights: {
-        type: Sequelize.STRING
-      },
-      rank: {
-        type: Sequelize.INTEGER
-      },
-      topic: {
-        type: Sequelize.STRING
-      },
-      country: {
-        type: Sequelize.STRING
-      },
-      language: {
-        type: Sequelize.STRING
-      },
-      authors: {
-        type: Sequelize.STRING
-      },
-      media: {
-        type: Sequelize.STRING
-      },
-      is_opinion: {
-        type: Sequelize.BOOLEAN
-      },
-      twitter_account: {
-        type: Sequelize.STRING
-      },
-      _score: {
-        type: Sequelize.FLOAT
-      },
-      _id: {
-        type: Sequelize.STRING
-      },
-      createdAt: {
+      url: {
+        type: Sequelize.STRING,
         allowNull: false,
-        type: Sequelize.DATE
       },
-      updatedAt: {
+      urlToImage: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        field:"url_to_image"
+      },
+      source: {
+        type: Sequelize.STRING,
         allowNull: false,
-        type: Sequelize.DATE
-      }
+      },
+      publishedAt: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        field: "published_at"
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('newsArticles');
+    await queryInterface.dropTable('articles');
   }
 };
