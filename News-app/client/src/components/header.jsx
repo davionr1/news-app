@@ -2,7 +2,7 @@ import  "./components.css"
 const Header = ()=>{
     return (
         <div className="header">
-            Find news near you
+            Find worldwide news
             
         </div>
     )

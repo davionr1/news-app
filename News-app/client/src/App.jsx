@@ -14,7 +14,7 @@ function App() {
         <body>
           <Header />
           <SearchArticle />
-          <NewsItem />
+          
         </body>
       </div>
     </>

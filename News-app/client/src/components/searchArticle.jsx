@@ -47,14 +47,17 @@ const SearchArticle = () => {
 
     }, [])
 
-    const handleSearch = () => {
+    const handleSearch = (e) => {
+        e.preventDefault();
         if (articleSearch) {
             getSearchResults()
         }
     }
 
     return (
+
         <div className="search-container">
+            <form onSubmit={handleSearch}>
             <div className="search-input">
                 <input
                     type="text"
@@ -62,15 +65,19 @@ const SearchArticle = () => {
                     onChange={(e) => setArticleSearch(e.target.value)}
                     placeholder="Search for news"
                 />
-                <input type='submit' onClick={handleSearch}></input>
+                <input type='submit' className="submit" onSubmit={handleSearch}/>
+                {/* <input className='submit' type='submit' onClick={handleSearch}/> */}
             </div>
-            {searchedArticle && ( // Conditional rendering based on searchedArticle state
-                <div className="news-identifier">Searches for {searchedArticle}
+            </form>
+            {searchedArticle && ( 
+                <div className="news-identifier">Searches for <b>{searchedArticle}</b>
                 <hr></hr>
                     <div className="article-list">
                         {articleData.map((article) => (
+                            <>
                             <NewsItem key={article.id} article={article} />
-
+                            {article.author && <div>by {article.author}</div>}
+                            </>
                         ))}
 
                     </div>
