@@ -76,7 +76,7 @@ const SearchArticle = () => {
                         {articleData.map((article) => (
                             <>
                             <NewsItem key={article.id} article={article} />
-                            {article.author && <div>by {article.author}</div>}
+                            
                             </>
                         ))}
 

@@ -21,10 +21,10 @@
     max-width: 700px;
     background: rgba(255, 255, 255, 0.202);
     margin-top: 2em;
-    margin-bottom: 4em;
+    margin-bottom: 3em;
     border-radius: 60px;
-    padding: 3.5em 4em;
-    
+    padding: 3em 4em;
+    padding-top: 25px;
 }
 .search-input input{
     background: transparent;
@@ -34,7 +34,6 @@
     padding-bottom:40px;
     font-size: 1.5em;
     font-family: 'Courier New', Courier, monospace;
-    line-height: -40px;
 }
 .search-input input[type="text"]::placeholder{
     display: flex;
@@ -56,4 +55,9 @@ button{
 }
 .article-list{
     font-size: .6em;
+    padding-top: 2em;
+    
+}
+.article-container{
+    padding-bottom: 2em;
 }
