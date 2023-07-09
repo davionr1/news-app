@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     content: article.content,
     url: article.url,
     urlToImage: article.urlToImage,
-    source: article.source,
+    source_id: article.source_id,
+    source_name: article.source_name,
     publishedAt: article.publishedAt
   }, {
     sequelize,

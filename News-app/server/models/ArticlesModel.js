@@ -27,50 +27,55 @@ const getArticles = async () => {
   })
 }
 
-const getArticleInfo = async(req,res) => {
+const searchArticles = async (articleSearch) => {
+  try {
 
-    try {
-      const response = await axios.get(
-        `https://newsapi.org/v2/top-headlines?q=us debt&sortBy=publishedAt&apiKey=${api_key}`
-      );
-      const articles = response.articles
-      console.log(articles);
-      // createArticleInfo(articles);
-    } catch (error) {
-      console.error('Error retrieving articles:', error.message);
-    }
+    const query = `
+      SELECT * 
+      FROM articles
+      WHERE title LIKE '%${articleSearch}%'
+      OR content LIKE '%${articleSearch}%'
+      OR description LIKE '%${articleSearch}%'
+    `;
+    const [rows] = await sequelize.query(query);
+    console.log(rows); // Handle the retrieved articles data
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+  }
+};
 
-    // sequelize.query(`SELECT * FROM articles ORDER BY id ASC`, (err,res)=>{
-    //   if(err){
-    //     console.log("Error retrieving Article");
-    //   }
-    //   else{
-    //     console.log("Retrieved Article", res.rows);
-    //   }
-    // })
-  
-}
+
 
 const createArticleInfo = async (articles) => {
   try {
     for (const article of articles) {
-      // Perform operations on each individual article
       const { title, author, description, publishedAt, source, url, urlToImage, content } = article;
+      
+      const { id, name } = source;
+      
+      const query = `
+        INSERT INTO articles (title, author, description, published_at, url_to_image, source_id, source_name, url, content) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-      const query = `INSERT INTO articles (title, author, description, published_at, url_to_image, source, url, content) 
-      VALUES ('${title}', '${author}', '${description}', '${publishedAt}', '${urlToImage}', '${source}', '${url}', '${content}')`;
-      sequelize.query(query, (err, res) => {
-        if (err) {
-          console.log("cannot complete");
-        }
-
-      })
+      await sequelize.query(query, {
+        replacements: [
+          title ?? null,
+          author ?? null,
+          description ?? null,
+          publishedAt ?? null,
+          urlToImage ?? null,
+          id ?? null,
+          name ?? null,
+          url ?? null,
+          content ?? null
+        ]
+      });
     }
   } catch (error) {
     console.error(error);
-
   }
-}
+};
 
 const deleteArticleInfo = () => {
   sequelize.query(`SELECT FROM articles where id=$1`, [id], (err, res) => {
@@ -87,5 +92,5 @@ module.exports = {
   deleteArticleInfo,
   getArticles,
   createArticleInfo,
-  getArticleInfo
+  searchArticles
 }

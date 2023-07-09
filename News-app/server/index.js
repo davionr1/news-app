@@ -1,13 +1,13 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const axios = require("axios").default;
 const { Sequelize, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(process.env.PG_URI)
 const api_key = process.env.API_KEY
 const cors = require('cors');
-
-const articleModel = require('./models/newsArticleModel')
+const {Articles} = require('./models/Articles');
+const articleModel = require('./models/ArticlesModel');
+const fetch = require('cross-fetch');
 
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -23,37 +23,51 @@ app.use((req, res, next) => {
 
 
 app.get('/articles', async (req, res) => {
-  articleModel.getArticleInfo()
-  .then(response =>{
-    res.status(200).send(response)
-  })
-  .catch(error =>{
-    res.status(500).send(error)
-  })
-
-  const createArticleInfo = async (articles) => {
-    try {
-      for (const article of articles) {
-        // Perform operations on each individual article
-        const { title, author, description, publishedAt, source, url, urlToImage, content } = article;
-        
-        const query = `INSERT INTO articles (title, author, description, published_at, url_to_image, source, url, content) 
-        VALUES ('${title}', '${author}', '${description}', '${publishedAt}', '${urlToImage}', '${source}', '${url}', '${content}')`;
-        sequelize.query(query, (err, res)=>{
-          if (err){
-            console.log("cannot complete");
-          }
-          
-        })  
-           }
-    } catch (error) {
-      console.error(error);
-      
-    }
-    }
-  
-  
+  articleModel.getArticles()
+    .then(response => {
+      res.status(200).send(response)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
+  console.log("back end works");
 });
+
+app.get('/search', async (req, res) => {
+  const { query } = req.query
+
+  articleModel.searchArticles(query)
+    .then(response => {
+      res.status(200).send(response)
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
+})
+
+
+
+app.get('/makeArticles', async (req, res) => {
+  const { q } = req.query
+
+  const url = `https://newsapi.org/v2/top-headlines?q=${encodeURIComponent(q)}&sortBy=publishedAt&apiKey=${api_key}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    try {
+      articleModel.createArticleInfo(data.articles)
+    }
+    catch (error) {
+      console.error('Error creating data:', error);
+    }
+    
+  }
+  catch (error) {
+    console.error('Error fetching data:', error);
+  }
+})
 
 
 
