@@ -1,10 +1,8 @@
 import './components.css'
 
-
-//fix cond statement for author
 const NewsItem = ({ article }) => {
   if (!article) {
-    return null
+    console.log("wrong");
   }
 
   return (
@@ -13,12 +11,9 @@ const NewsItem = ({ article }) => {
       <h2>{article.title}</h2>
       <p>{article.description}</p>
       {article.content && <div>{article.content}</div>}
-      <p>{article.publishedAt}</p>
-      <p>{article.source.name}</p>
+      {article.publishedAt && <p>{article.publishedAt}</p> || article.published_at && <p>{article.published_at}</p>}
+      {article.source_name && <p>{article.source_name}</p> || article.source && article.source.name && <p>{article.source.name}</p>}
       <a href={article.url} target="_blank" rel="noopener noreferrer">read more</a>
-
-
-
       <hr />
     </div>
   );

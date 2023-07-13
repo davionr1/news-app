@@ -5,7 +5,7 @@ const { Sequelize, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(process.env.PG_URI)
 const api_key = process.env.API_KEY
 const cors = require('cors');
-const {Articles} = require('./models/Articles');
+const { Articles } = require('./models/Articles');
 const articleModel = require('./models/ArticlesModel');
 const fetch = require('cross-fetch');
 
@@ -22,23 +22,13 @@ app.use((req, res, next) => {
 })
 
 
-app.get('/articles', async (req, res) => {
-  articleModel.getArticles()
-    .then(response => {
-      res.status(200).send(response)
-    })
-    .catch(error => {
-      res.status(500).send(error)
-    })
-  console.log("back end works");
-});
-
 app.get('/search', async (req, res) => {
   const { query } = req.query
 
-  articleModel.searchArticles(query)
+   articleModel.searchArticles(query)
     .then(response => {
       res.status(200).send(response)
+      console.log(response);
     })
     .catch(error => {
       res.status(500).send(error)
@@ -55,14 +45,15 @@ app.get('/makeArticles', async (req, res) => {
   try {
     const response = await fetch(url);
     const data = await response.json();
-
+    console.log(data);
+    res.send(data)
     try {
-      articleModel.createArticleInfo(data.articles)
+      // articleModel.createArticleInfo(data.articles)
     }
     catch (error) {
       console.error('Error creating data:', error);
     }
-    
+
   }
   catch (error) {
     console.error('Error fetching data:', error);

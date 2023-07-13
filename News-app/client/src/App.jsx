@@ -10,7 +10,6 @@ function App() {
         <body>
           <Header />
           <SearchArticle />
-          
         </body>
       </div>
     </>

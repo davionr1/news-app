@@ -12,36 +12,33 @@ sequelize.sync().then(() => {
   console.log('Database is synced. ');
 });
 
-
-
-const getArticles = async () => {
-  return new Promise(function (resolve, reject) {
-    sequelize.query(`SELECT * FROM articles ORDER BY articles_id ASC `, (err, res) => {
-      if (err) {
-        reject("Error retrieving Article");
-      }
-      else {
-        resolve("Retrieved Article", res.rows);
-      }
-    })
-  })
-}
-
 const searchArticles = async (articleSearch) => {
   try {
+    const searchTerm = `%${articleSearch}%`
 
     const query = `
       SELECT * 
       FROM articles
-      WHERE title LIKE '%${articleSearch}%'
-      OR content LIKE '%${articleSearch}%'
-      OR description LIKE '%${articleSearch}%'
+      WHERE title LIKE '%${searchTerm}%'
+      OR content LIKE '%${searchTerm}%'
+      OR description LIKE '%${searchTerm}%'
+      OR author LIKE '%${searchTerm}%'
+      OR source_id LIKE '%${searchTerm}%'
+      OR source_name LIKE '%${searchTerm}%'
     `;
-    const [rows] = await sequelize.query(query);
-    console.log(rows); // Handle the retrieved articles data
+    
+    const [rows] = await sequelize.query(query, {replacements: {searchTerm}});
+     
+    if (rows.length > 0) {
+      console.log("Data found in the database");
+      return rows 
+    } else {
+      console.log("No data found in the database");
+    }
   } catch (error) {
     console.error('Error fetching articles:', error);
   }
+ 
 };
 
 
@@ -90,7 +87,6 @@ const deleteArticleInfo = () => {
 
 module.exports = {
   deleteArticleInfo,
-  getArticles,
   createArticleInfo,
   searchArticles
 }
