@@ -9,46 +9,48 @@ const SearchArticle = () => {
     const [searchedArticle, setSearchedArticle] = useState('')
     const api_key = import.meta.env.VITE_KEY
 
+
     const getSearchResults = async () => {
+        //check to see if data is in db
         try {
-            const response = await fetch(`https://newsapi.org/v2/top-headlines?q=${(articleSearch)}&sortBy=publishedAt&apiKey=${api_key}`)
-            const data = await response.json()
-            setArticleData(data.articles)
-            console.log("frontend", data.articles);
+            const DBresponse = await fetch(`http://localhost:4000/search?query=${articleSearch}`);
+            if (DBresponse.ok) {
+                const DBdata = await DBresponse.json();
+
+                if (DBdata.length > 0) {
+
+                    console.log("data retrieved from backend", DBdata);
+                    setArticleData(DBdata)
+                    setSearchedArticle(articleSearch)
+
+
+                }
+                
+            }
+
+            //else retrieve from api data
+        }
+
+        catch {
+            const apiResponse = await fetch(`https://newsapi.org/v2/top-headlines?q=${(articleSearch)}&sortBy=publishedAt&apiKey=${api_key}`)
+            const apiData = await apiResponse.json()
+
+            setArticleData(apiData.articles)
+
+            console.log("retrieved from api data", apiData.articles);
+
             setSearchedArticle(articleSearch)
+
             const createData = await fetch(`http://localhost:4000/makeArticles?q=${encodeURIComponent(articleSearch)}`)
             const backend = await createData.json()
             console.log("backend", backend);
         }
-        catch (error) {
-            console.log("error fetching data", error);
-        }
     }
-
-    const getArticlesFromDB = async () => {
-        try {
-            const response = await fetch(`http://localhost:4000/search?query=${articleSearch}`);
-
-            const data = await response.json();
-
-            if (data === null) {
-                getSearchResults()
-                console.log("No data retrieved from the database");
-            } else {
-                setArticleData(data);
-                setSearchedArticle(articleSearch)
-                console.log("Data retrieved successfully", data);
-            }
-        } catch {
-            console.log("Error retrieving data from the server:");
-            getSearchResults();
-        }
-    };
 
     const handleSearch = (e) => {
         e.preventDefault();
         if (articleSearch) {
-            getArticlesFromDB()
+            getSearchResults()
 
         }
     }

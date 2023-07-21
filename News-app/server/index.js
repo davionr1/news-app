@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 app.get('/search', async (req, res) => {
   const { query } = req.query
 
-   articleModel.searchArticles(query)
+  articleModel.searchArticles(query)
     .then(response => {
       res.status(200).send(response)
       console.log(response);
@@ -48,7 +48,7 @@ app.get('/makeArticles', async (req, res) => {
     console.log(data);
     res.send(data)
     try {
-      // articleModel.createArticleInfo(data.articles)
+      articleModel.createArticleInfo(data.articles)
     }
     catch (error) {
       console.error('Error creating data:', error);

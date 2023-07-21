@@ -17,28 +17,27 @@ const searchArticles = async (articleSearch) => {
     const searchTerm = `%${articleSearch}%`
 
     const query = `
-      SELECT * 
-      FROM articles
-      WHERE title LIKE '%${searchTerm}%'
-      OR content LIKE '%${searchTerm}%'
-      OR description LIKE '%${searchTerm}%'
-      OR author LIKE '%${searchTerm}%'
-      OR source_id LIKE '%${searchTerm}%'
-      OR source_name LIKE '%${searchTerm}%'
-    `;
-    
-    const [rows] = await sequelize.query(query, {replacements: {searchTerm}});
-     
+  SELECT * 
+  FROM articles
+  WHERE (title) ILIKE '%${searchTerm}%'
+  OR (content) ILIKE '%${searchTerm}%'
+  OR (description) ILIKE '%${searchTerm}%'
+  OR (author) ILIKE '%${searchTerm}%'
+  OR (source_id) ILIKE '%${searchTerm}%'
+  OR (source_name) ILIKE '%${searchTerm}%'
+`;
+    const [rows] = await sequelize.query(query, { replacements: { searchTerm } });
+
     if (rows.length > 0) {
       console.log("Data found in the database");
-      return rows 
+      return rows
     } else {
       console.log("No data found in the database");
     }
   } catch (error) {
     console.error('Error fetching articles:', error);
   }
- 
+
 };
 
 
@@ -47,9 +46,9 @@ const createArticleInfo = async (articles) => {
   try {
     for (const article of articles) {
       const { title, author, description, publishedAt, source, url, urlToImage, content } = article;
-      
+
       const { id, name } = source;
-      
+
       const query = `
         INSERT INTO articles (title, author, description, published_at, url_to_image, source_id, source_name, url, content) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
