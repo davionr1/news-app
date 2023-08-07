@@ -6,6 +6,7 @@ const sequelize = new Sequelize(process.env.PG_URI)
 const sqlite3 = require('sqlite3')
 const axios = require("axios").default;
 const api_key = process.env.API_KEY
+const fetch = require('cross-fetch');
 
 // Sync the model with the database
 sequelize.sync().then(() => {
@@ -31,16 +32,16 @@ const searchArticles = async (articleSearch) => {
     if (rows.length > 0) {
       console.log("Data found in the database");
       return rows
-    } else {
-      console.log("No data found in the database");
     }
-  } catch (error) {
-    console.error('Error fetching articles:', error);
+    else{
+        console.log("No data found in the database");
+        return [];
+    }
+   
+
   }
-
-};
-
-
+  catch { }
+}
 
 const createArticleInfo = async (articles) => {
   try {

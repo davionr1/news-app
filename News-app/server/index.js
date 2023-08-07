@@ -16,51 +16,98 @@ app.use(cors({
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers");
   next();
 })
 
 
 app.get('/search', async (req, res) => {
-  const { query } = req.query
-
-  articleModel.searchArticles(query)
+  const { q } = req.query
+console.log(q);
+  articleModel.searchArticles(q)
     .then(response => {
       res.status(200).send(response)
       console.log(response);
     })
     .catch(error => {
+      
       res.status(500).send(error)
     })
 })
 
-
-
 app.get('/makeArticles', async (req, res) => {
   const { q } = req.query
-
-  const url = `https://newsapi.org/v2/top-headlines?q=${encodeURIComponent(q)}&sortBy=publishedAt&apiKey=${api_key}`;
-
+  const url = (`https://newsapi.org/v2/top-headlines?q=${encodeURIComponent(q)}&sortBy=publishedAt&apiKey=${api_key}`)
   try {
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log(data);
-    res.send(data)
+    const response = await fetch(url)
+    const data = await response.json()
+    res.send(data.articles)
+    
     try {
-      articleModel.createArticleInfo(data.articles)
+      //fix db id numbering later
+      //articleModel.createArticleInfo(data.articles)
     }
     catch (error) {
       console.error('Error creating data:', error);
     }
-
   }
   catch (error) {
     console.error('Error fetching data:', error);
   }
 })
 
+app.get('/makeNewDataArticles', async (req, res) => {
+  const { data } = req.query
+  
+  try {
+    const newData = JSON.parse(data)
+    res.send(newData)
+    try {
+      //fix db id numbering later
+      articleModel.createArticleInfo(newData)
+      res.send("work")
+    }
+    catch (error) {
+      console.error('Error creating data:', error);
+    }
+  }
+  catch (error) {
+    console.error('Error fetching data:', error);
+  }
+})
 
+app.get('/makeTopSplitArticles', async (req, res) => {
+  const { topData } = req.query
+  try {
+    try {
+      //fix db id numbering later
+      await articleModel.createArticleInfo(JSON.parse(topData));
+    }
+    catch (error) {
+      console.error('Error creating data:', error);
+    }
+  }
+  catch (error) {
+    console.error('Error fetching the data:', error);
+  }
+})
+
+app.get('/makeBottomSplitArticles', async (req, res) => {
+  const {bottomData } = req.query
+  try {
+    try {
+      //fix db id numbering later
+      await articleModel.createArticleInfo(JSON.parse(bottomData));
+    }
+    catch (error) {
+      console.error('Error creating data:', error);
+    }
+  }
+  catch (error) {
+    console.error('Error fetching the data:', error);
+  }
+})
 
 app.listen(process.env.PORT, () => {
   console.log(` ${process.env.PORT}`);
