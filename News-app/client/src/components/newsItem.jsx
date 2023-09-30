@@ -1,5 +1,5 @@
 import './components.css'
-const currentyear = new Date().getFullYear()
+
 const NewsItem = ({ article }) => {
 
   return (

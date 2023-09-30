@@ -2,9 +2,6 @@ import './components.css'
 import { useEffect, useState } from 'react';
 import NewsItem from './newsItem';
 import './calendar.css'
-import dayjs, { Dayjs } from 'dayjs'
-import { format } from 'date-fns'
-import Calendar from 'react-calendar';
 
 const api_key = import.meta.env.VITE_KEY
 
