@@ -46,7 +46,7 @@ app.get('/makeArticles', async (req, res) => {
     
     try {
       //fix db id numbering later
-      //articleModel.createArticleInfo(data.articles)
+      articleModel.createArticleInfo(data.articles)
     }
     catch (error) {
       console.error('Error creating data:', error);

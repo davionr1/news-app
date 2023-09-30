@@ -26,6 +26,7 @@ const searchArticles = async (articleSearch) => {
   OR (author) ILIKE '%${searchTerm}%'
   OR (source_id) ILIKE '%${searchTerm}%'
   OR (source_name) ILIKE '%${searchTerm}%'
+  OR (published_at) ILIKE '%${searchTerm}%'
 `;
     const [rows] = await sequelize.query(query, { replacements: { searchTerm } });
 

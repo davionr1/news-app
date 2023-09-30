@@ -1,35 +1,33 @@
 import './components.css'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import NewsItem from './newsItem';
-import './calendar.css'
-import dayjs, { Dayjs } from 'dayjs'
-import { format } from 'date-fns'
 import Calendar from 'react-calendar';
-
+import './calendar.css'
+import dayjs from 'dayjs'
+import { isSameDay } from 'dayjs';
 const api_key = import.meta.env.VITE_KEY
 
-const SearchArticle = () => {
+const SearchArticle = ({classes}) => {
 
     const [articleData, setArticleData] = useState([]);
     const [articleSearch, setArticleSearch] = useState('');
     const [searchedArticle, setSearchedArticle] = useState('')
     const [sortBy, setSortBy] = useState('')
     const [searchEndpoint, setSearchEndpoint] = useState('')
-    const [firstDate, setFirstDate] = useState('')
-    const [secondDate, setSecondDate] = useState('')
-    const [validFirstDate, setFirstValidDate] = useState(true)
-    const [validSecondDate, setSecondValidDate] = useState(true)
+    const [dates, setDates] = useState([])
 
     const sort = ['publishedAt', 'relevancy', 'popularity']
     const endpoint = ['top-headlines', 'everything']
     const defaultValueEndpoint = 'top-headlines'
     const defaultValueSortBy = 'publishedAt'
 
+    //set up the data shown to user as most recent to not
+
     const getSearchResults = async () => {
         //check to see if data is in db
         //for the from and to part of the url change 
         const apiResponse = await fetch(
-            `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&apiKey=${api_key}${firstDate & secondDate ? `&from=${firstDate}` : ''} ${firstDate & secondDate ? `&to=${secondDate}` : ''}`)
+            `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&apiKey=${api_key}${minDate ? `&from=${minDate}` : ''} ${maxDate ? `&to=${maxDate}` : ''}`)
         const apiData = await apiResponse.json()
 
         const DBresponse = await fetch(`http://localhost:4000/search?q=${articleSearch}`);
@@ -131,6 +129,7 @@ const SearchArticle = () => {
             getSearchResults()
         }
     }
+
     const handleEndpoint = (e) => {
         setSearchEndpoint(e.target.value)
     }
@@ -139,48 +138,34 @@ const SearchArticle = () => {
         setSortBy(e.target.value)
     }
 
-    useEffect(() => {
-        checkDateInput()
-    }, [firstDate, secondDate])
-
-    const handleFormatInput = (e) => {
-        setSecondDate(e.target.value)
-
+    const onClickDay = (date) =>{
+        const dateAlreadyClicked = dates.some((setDate)=>{
+            isSameDay(setDates, date)
+        })
+        if (!dateAlreadyClicked){
+            setDates([...dates, date]);
+        }
+        else{
+            const updatedDates = dates.filter((selectedDate)=>{
+                !isSameDay(dates, date)
+            })
+            setDates(updatedDates)
+        }
+    }
+    const isSameDay = (date, setDates) =>{
+        const notSameDay = !dates.some((date)=>{
+            return notSameDay
+        })
+    }
+    const tileClassName = ({date}) => {
+            const classNames = [classes]
+            // give active days a special class
+            if (dateAlreadyClicked(dates, date)) return [classes.activeDay, ...classNames]
+            return classNames
+          
+        
     }
 
-    //use select range to store all the dates in a array then output first and last index
-    const checkDateInput = () => {
-        const dateFormatPattern = /^(198[0-9]|199[0-9]|200[0-9]|201[0-9]|202[0-4])[-](0[1-9]|[1][0-2])[-](0[1-9]|[12][0-9]|3[01])\s?$/
-        const validFirstPattern = (console.log(dateFormatPattern.test(firstDate)))
-        const validSecondPattern = (console.log(dateFormatPattern.test(secondDate)))
-
-        console.log(firstDate, secondDate);
-
-        if (validFirstPattern) {
-            setFirstValidDate(true)
-        }
-        else {
-            setFirstValidDate(false)
-        }
-
-        if (validSecondPattern) {
-            setSecondValidDate(true)
-        }
-        else {
-            setSecondValidDate(false)
-        }
-
-        console.log(dateFormatPattern.test(secondDate))
-    };
-
- 
-
-    const sortedArticle = articleData.sort((a, b) => {
-        const dateA = new Date(a.publishedAt || a.published_at || '')
-        const dateB = new Date(b.publishedAt || b.published_at || '')
-        return dateB - dateA;
-    })
-  
     return (
         <>
             <div className="search-container">
@@ -209,44 +194,26 @@ const SearchArticle = () => {
                     </select>
                 </div>
 
-                {/* create a route that gets data with specific dates in the situation that user puts in dates  */}
+
+
+                {/* adjust this calendar form code */}
                 <div className="calender-container">
-                    <h2>Search two dates for your search - optional</h2>
-                    <form>
-                        <b>From</b>
-                        <>
-                            <div className="dateFirstBox">
-                                <input type='text'
-                                    value={firstDate}
-                                    onChange={(e) => { setFirstDate(e.target.value) }}
-                                    placeholder='0000/00/00'
-                                />
-                            </div>
-
-                            {firstDate.length > 0 && firstDate.length !== 10 && !validFirstDate && (
-                                <div className='notValidDate'>
-                                    Date must be in format of: 2023-07-22
-                                </div>
-                            )
-                            }
-                        </>
-                        <b>To</b>
-                        <div className="dateSecondBox">
-                            <input type='text'
-                                value={secondDate}
-                                onChange={handleFormatInput}
-                                placeholder='0000/00/00'
-                            />
-                        </div>
-                        {secondDate.length > 0 && secondDate.length !== 10 && !validSecondDate && (
-                            <div className='notValidDate'>
-                                Date must be in format of: 2023-07-27
-                            </div>
-                        )
-                        }
-                    </form>
+                    <h2>Select two dates to range from</h2>
+                    <Calendar onClickDay={onClickDay} value={dates} />
                 </div>
+                {dates.length > 0 ? (
 
+                    <p >
+                        {/* <span >Start:</span>{''} {dates[0].toDateString()}
+                        &nbsp; to &nbsp;
+                        <span>End:</span> {dates[1].toDateString()} */}
+                    </p>
+                ) : (
+                    <p>
+                        {/* <span>Selected date:</span>{''} {dates.toDateString()} */}
+                    </p>
+
+                )}
                 <form onSubmit={handleSearch}>
                     <div className="search-input">
                         <input
@@ -259,19 +226,27 @@ const SearchArticle = () => {
                     </div>
                 </form>
 
+
+
                 {searchedArticle && (
                     <div className="news-identifier">Searches for <b>{searchedArticle}</b>
+
                         <div className="article-list">
-                            <>
-                            {sortedArticle.map((article) => (
-                                <NewsItem key={article.id} article={article} />
-                                ))}
-                            </>
+
+                            {articleData.map((article) => (
+                                <><hr />
+                                    <NewsItem key={article.id} article={article} />
+                                </>
+                            ))}
                         </div>
                     </div>
                 )}
             </div>
+
+
+
         </>
     )
+
 }
 export default SearchArticle

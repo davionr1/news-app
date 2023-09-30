@@ -1,24 +1,26 @@
-.header{
+.header {
     background-color: lightblue;
     font-size: 2.5em;
     font-family: 'Courier New', Courier, monospace;
     text-align: center;
-    width:100%;
+    width: 100%;
     display: block;
     padding: 60px 0px;
 }
-.search-container{
+
+.search-container {
     width: 100%;
     text-align: center;
     border-radius: 0px;
-    display:flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
-.search-input{
-    width: 100%;
-    max-width: 700px;
+
+.search-input {
+
+    max-width: 650px;
     background: rgba(255, 255, 255, 0.202);
     margin-top: 2em;
     margin-bottom: 3em;
@@ -26,38 +28,63 @@
     padding: 3em 4em;
     padding-top: 25px;
 }
-.search-input input{
+
+.search-input input {
     background: transparent;
     float: left;
     border: 0;
     outline: none;
-    padding-bottom:40px;
+    padding-bottom: 20px;
     font-size: 1.5em;
     font-family: 'Courier New', Courier, monospace;
 }
-.search-input input[type="text"]::placeholder{
+
+.search-input input[type="text"]::placeholder {
     display: flex;
     align-items: center;
 }
-button{
-    font-size: 1.4em;
+
+button {
+    font-size: 1.2em;
     padding: 24px 20px;
     margin: -10px 20px 20px 10em;
 }
- .submit{ 
-    margin-left: 10em;
+
+.submit {
+    margin-left: 3em;
 }
-.button-img{
+
+.button-img {
     width: 20px;
 }
-.news-identifier{
+
+.news-identifier {
     font-size: 2em;
 }
-.article-list{
+
+.article-list {
     font-size: .6em;
     padding-top: 2em;
-    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
-.article-container{
-    padding-bottom: 2em;
+
+hr {
+    width: 99.9%;
+}
+
+.dayTile {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+    cursor: pointer;
+}
+.clicked{
+    background-color: red;
+}
+.notValidDate{
+    color: rgba(118, 9, 53, 0.711);
 }
