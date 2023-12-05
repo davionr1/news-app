@@ -13,32 +13,57 @@ sequelize.sync().then(() => {
   console.log('Database is synced. ');
 });
 
-const searchArticles = async (articleSearch) => {
+const searchArticles = async (q, fromDate, toDate) => {
   try {
-    const searchTerm = `%${articleSearch}%`
+    const searchTerm = `%${q}%`
+    const from = `${fromDate}`
+    const to = `${toDate}`
+    let query;
 
-    const query = `
-  SELECT * 
-  FROM articles
-  WHERE (title) ILIKE '%${searchTerm}%'
-  OR (content) ILIKE '%${searchTerm}%'
-  OR (description) ILIKE '%${searchTerm}%'
-  OR (author) ILIKE '%${searchTerm}%'
-  OR (source_id) ILIKE '%${searchTerm}%'
-  OR (source_name) ILIKE '%${searchTerm}%'
-  OR (published_at) ILIKE '%${searchTerm}%'
-`;
-    const [rows] = await sequelize.query(query, { replacements: { searchTerm } });
+    if (from && to === null) {
+      // Query with date range condition
+      query = `
+        SELECT *
+        FROM articles
+        WHERE (
+          (title ILIKE '%${searchTerm}%'
+            OR content ILIKE '%${searchTerm}%'
+            OR description ILIKE '%${searchTerm}%'
+            OR author ILIKE '%${searchTerm}%'
+            OR source_id ILIKE '%${searchTerm}%'
+            OR source_name ILIKE '%${searchTerm}%')
+            
+        )
+      `;
+    } else if (from && to) {
+      // Query without date range condition
+      query = `
+        SELECT *
+        FROM articles
+        WHERE (
+          title ILIKE '%${searchTerm}%'
+          OR content ILIKE '%${searchTerm}%'
+          OR description ILIKE '%${searchTerm}%'
+          OR author ILIKE '%${searchTerm}%'
+          OR source_id ILIKE '%${searchTerm}%'
+          OR source_name ILIKE '%${searchTerm}%'
+          AND (published_at BETWEEN '${from}' AND '${to}')
+        )
+      `;
+    }
+    console.log(query);
+
+    const [rows] = await sequelize.query(query, { replacements: { searchTerm, from, to } });
 
     if (rows.length > 0) {
       console.log("Data found in the database");
       return rows
     }
-    else{
-        console.log("No data found in the database");
-        return [];
+    else {
+      console.log("No data found in the database");
+      return [];
     }
-   
+
 
   }
   catch { }

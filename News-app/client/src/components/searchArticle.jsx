@@ -2,6 +2,8 @@ import './components.css'
 import { useEffect, useState } from 'react';
 import NewsItem from './newsItem';
 import './calendar.css'
+import { GetDifferenceOfNewEntries } from './getDifferenceOfNewEntries';
+import { splitData } from './splitData'
 
 const api_key = import.meta.env.VITE_KEY
 
@@ -29,10 +31,10 @@ const SearchArticle = () => {
             `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&apiKey=${api_key}${firstDate & secondDate ? `&from=${firstDate}` : ''} ${firstDate & secondDate ? `&to=${secondDate}` : ''}`)
         const apiData = await apiResponse.json()
 
-        const DBresponse = await fetch(`http://localhost:4000/search?q=${articleSearch}`);
+        const DBresponse = await fetch(`http://localhost:4000/search?q=${articleSearch}${firstDate && secondDate ? `&fromDate=${firstDate}` : ''} ${firstDate && secondDate ? `&toDate=${secondDate}` : ''}`);
         const DBdata = await DBresponse.json();
-
-        const newData = getDifferenceOfNewEntries(DBdata, apiData)
+        //for next session: call a function in the dbdata conditional statement for a function that sets data to jsx without apidata or newdata
+        const newData = GetDifferenceOfNewEntries(DBdata, apiData)
 
         console.log("db", DBdata);
         console.log("api", apiData);
@@ -40,6 +42,7 @@ const SearchArticle = () => {
 
         //if theres no data in db
         if (!DBdata || DBdata.length === 0) {
+
             try {
                 console.log("make data if not data in db");
                 if (searchEndpoint || defaultValueEndpoint !== "everything") {
@@ -69,6 +72,7 @@ const SearchArticle = () => {
             try {
                 //else, check to see if theres a difference between api and db data
                 if (newData.length > 0 && searchEndpoint || defaultValueEndpoint !== "everything") {
+
                     //add the difference to db
                     const createData = await fetch(`http://localhost:4000/makeNewDataArticles?q=${encodeURIComponent(articleSearch)}&data=${encodeURIComponent(JSON.stringify(newData))}`)
                     console.log("added the new entries");
@@ -87,40 +91,19 @@ const SearchArticle = () => {
         }
         console.log("last output");
         //outputs on the screen the combined data of the db and new data
-        setArticleData([...DBdata, ...newData])
-        setSearchedArticle(articleSearch)
+        
+         if (!firstDate && !secondDate) {
+            console.log(DBdata, "y");
+            setArticleData([...DBdata, ...newData])
+            setSearchedArticle(articleSearch)
+            console.log("null")
+        }
+        else if (firstDate && secondDate){
+            console.log("h")
+            setArticleData([...DBdata, ...newData])
+            setSearchedArticle(articleSearch)
+            }
     }
-
-    const getDifferenceOfNewEntries = (DBdata, apiData) => {
-        //looks through db and api for data thats not in db and stores into newdata variable
-        try {
-            const existingTitles = DBdata.map((data) => data.title);
-            const newData = apiData.articles.filter((article) => !existingTitles.includes(article.title));
-            return newData;
-        } catch (error) {
-            console.error('Error filtering new entries:', error);
-            return [];
-        }
-    };
-
-    const splitData = async (newData) => {
-        //in case of 431 error, this func splits the data to one at a time store the data in the db
-        try {
-            const midPoint = newData.length / 2;
-            const topHalf = newData.slice(0, midPoint);
-            const bottomHalf = newData.slice(midPoint);
-
-            const responseArray = await Promise.all([
-                fetch(`http://localhost:4000/makeTopSplitArticles?topData=${encodeURIComponent(JSON.stringify(topHalf))}`),
-                fetch(`http://localhost:4000/makeBottomSplitArticles?bottomData=${encodeURIComponent(JSON.stringify(bottomHalf))}`)
-            ])
-            return [topHalf, bottomHalf];
-        } catch (error) {
-            // Handle any other errors that may occur during the fetch operation
-            console.error("Error while splitting data:", error.message);
-            throw error; // Propagate the error to the caller, if necessary
-        }
-    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -136,20 +119,24 @@ const SearchArticle = () => {
         setSortBy(e.target.value)
     }
 
-    useEffect(() => {
-        checkDateInput()
-    }, [firstDate, secondDate])
-
     const handleFormatInput = (e) => {
         setSecondDate(e.target.value)
-
     }
 
-    //use select range to store all the dates in a array then output first and last index
+    useEffect(() => {
+        try {
+            checkDateInput()
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }, [firstDate, secondDate])
+
     const checkDateInput = () => {
+
         const dateFormatPattern = /^(198[0-9]|199[0-9]|200[0-9]|201[0-9]|202[0-4])[-](0[1-9]|[1][0-2])[-](0[1-9]|[12][0-9]|3[01])\s?$/
-        const validFirstPattern = (console.log(dateFormatPattern.test(firstDate)))
-        const validSecondPattern = (console.log(dateFormatPattern.test(secondDate)))
+        const validFirstPattern = dateFormatPattern.test(firstDate)
+        const validSecondPattern = dateFormatPattern.test(secondDate)
 
         console.log(firstDate, secondDate);
 
@@ -166,18 +153,15 @@ const SearchArticle = () => {
         else {
             setSecondValidDate(false)
         }
-
-        console.log(dateFormatPattern.test(secondDate))
-    };
-
- 
+        dateFormatPattern.test(secondDate)
+    }
 
     const sortedArticle = articleData.sort((a, b) => {
         const dateA = new Date(a.publishedAt || a.published_at || '')
         const dateB = new Date(b.publishedAt || b.published_at || '')
         return dateB - dateA;
     })
-  
+
     return (
         <>
             <div className="search-container">
@@ -260,8 +244,8 @@ const SearchArticle = () => {
                     <div className="news-identifier">Searches for <b>{searchedArticle}</b>
                         <div className="article-list">
                             <>
-                            {sortedArticle.map((article) => (
-                                <NewsItem key={article.id} article={article} />
+                                {sortedArticle.map((article) => (
+                                    <NewsItem key={article.id} article={article} />
                                 ))}
                             </>
                         </div>
