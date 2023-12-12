@@ -33,7 +33,7 @@ const SearchArticle = () => {
 
         const DBresponse = await fetch(`http://localhost:4000/search?q=${articleSearch}${firstDate && secondDate ? `&fromDate=${firstDate}` : ''} ${firstDate && secondDate ? `&toDate=${secondDate}` : ''}`);
         const DBdata = await DBresponse.json();
-        //for next session: call a function in the dbdata conditional statement for a function that sets data to jsx without apidata or newdata
+        //call a function in the dbdata conditional statement for a function that sets data to jsx without apidata or newdata
         const newData = GetDifferenceOfNewEntries(DBdata, apiData)
 
         console.log("db", DBdata);
@@ -256,3 +256,4 @@ const SearchArticle = () => {
     )
 }
 export default SearchArticle
+ 

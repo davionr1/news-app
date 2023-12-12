@@ -25,34 +25,34 @@ app.use((req, res, next) => {
 app.get('/search', async (req, res) => {
 
   const { q, fromDate, toDate } = req.query
- 
 
-console.log(q,fromDate,toDate);
+  console.log(q, fromDate, toDate);
 
-if(fromDate && toDate){
-  articleModel.searchArticles(q, fromDate, toDate)
-    .then(response => {
-      res.status(200).send(response)
-      console.log(response, "dates and stuff");
-    })
-    .catch(error => {
-      res.status(500).send(error)
-    })
-}
+  if (fromDate && toDate) {
+    articleModel.searchArticles(q, fromDate, toDate)
+      .then(response => {
+        res.status(200).send(response)
+        console.log(response, "dates and stuff");
+      })
+      .catch(error => {
+        res.status(500).send(error)
+      })
+  }
 
-else{
-  articleModel.searchArticles(q)
-    .then(response => {
-      res.status(200).send(response)
-      console.log(response,"else state");
-      
-    })
-    .catch(error => {
-      
-      res.status(500).send(error)
-    })
+  else {
+    articleModel.searchArticles(q)
+      .then(response => {
+        res.status(200).send(response)
+        console.log(response, "else state");
 
-}})
+      })
+      .catch(error => {
+
+        res.status(500).send(error)
+      })
+
+  }
+})
 
 app.get('/makeArticles', async (req, res) => {
   const { q } = req.query
@@ -61,7 +61,7 @@ app.get('/makeArticles', async (req, res) => {
     const response = await fetch(url)
     const data = await response.json()
     res.send(data.articles)
-    
+
     try {
       //fix db id numbering later
       articleModel.createArticleInfo(data.articles)
@@ -77,7 +77,7 @@ app.get('/makeArticles', async (req, res) => {
 
 app.get('/makeNewDataArticles', async (req, res) => {
   const { data } = req.query
-  
+
   try {
     const newData = JSON.parse(data)
     res.send(newData)
@@ -112,7 +112,7 @@ app.get('/makeTopSplitArticles', async (req, res) => {
 })
 
 app.get('/makeBottomSplitArticles', async (req, res) => {
-  const {bottomData } = req.query
+  const { bottomData } = req.query
   try {
     try {
       //fix db id numbering later
