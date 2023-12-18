@@ -16,11 +16,11 @@ sequelize.sync().then(() => {
 const searchArticles = async (q, fromDate, toDate) => {
   try {
     const searchTerm = `%${q}%`
-    const from = `${fromDate}`
-    const to = `${toDate}`
+    const from = fromDate
+    const to = toDate
     let query;
 
-    if (from && to === null) {
+    if (!from && !to) {
       // Query with date range condition
       query = `
         SELECT *
@@ -32,26 +32,24 @@ const searchArticles = async (q, fromDate, toDate) => {
             OR author ILIKE '%${searchTerm}%'
             OR source_id ILIKE '%${searchTerm}%'
             OR source_name ILIKE '%${searchTerm}%')
-            
-        )
-      `;
-    } else if (from && to) {
+            )`;
+    }
+    else if (from && to) {
       // Query without date range condition
       query = `
         SELECT *
         FROM articles
         WHERE (
-          title ILIKE '%${searchTerm}%'
-          OR content ILIKE '%${searchTerm}%'
-          OR description ILIKE '%${searchTerm}%'
-          OR author ILIKE '%${searchTerm}%'
-          OR source_id ILIKE '%${searchTerm}%'
-          OR source_name ILIKE '%${searchTerm}%'
-          AND (published_at BETWEEN '${from}' AND '${to}')
-        )
-      `;
+          (title) ILIKE '%${searchTerm}%'
+          OR (content) ILIKE '%${searchTerm}%'
+          OR (description) ILIKE '%${searchTerm}%'
+          OR (author) ILIKE '%${searchTerm}%'
+          OR (source_id) ILIKE '%${searchTerm}%'
+          OR (source_name) ILIKE '%${searchTerm}%'
+          )
+          AND published_at BETWEEN '${from}' AND '${to}'
+          `;
     }
-    console.log(query);
 
     const [rows] = await sequelize.query(query, { replacements: { searchTerm, from, to } });
 
@@ -59,14 +57,17 @@ const searchArticles = async (q, fromDate, toDate) => {
       console.log("Data found in the database");
       return rows
     }
+
     else {
       console.log("No data found in the database");
       return [];
     }
 
-
   }
-  catch { }
+  catch (error) {
+    console.error("Error in searchArticles:", error);
+    return [];
+  }
 }
 
 const createArticleInfo = async (articles) => {

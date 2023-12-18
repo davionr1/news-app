@@ -25,8 +25,7 @@ const SearchArticle = () => {
     const defaultValueSortBy = 'publishedAt'
 
     const getSearchResults = async () => {
-        //check to see if data is in db
-        //for the from and to part of the url change 
+        //retrieve api data from user input
         const apiResponse = await fetch(
             `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&apiKey=${api_key}${firstDate & secondDate ? `&from=${firstDate}` : ''} ${firstDate & secondDate ? `&to=${secondDate}` : ''}`)
         const apiData = await apiResponse.json()
@@ -91,19 +90,14 @@ const SearchArticle = () => {
         }
         console.log("last output");
         //outputs on the screen the combined data of the db and new data
-        
-         if (!firstDate && !secondDate) {
+
             console.log(DBdata, "y");
-            setArticleData([...DBdata, ...newData])
+            setArticleData(DBdata)
             setSearchedArticle(articleSearch)
             console.log("null")
-        }
-        else if (firstDate && secondDate){
-            console.log("h")
-            setArticleData([...DBdata, ...newData])
-            setSearchedArticle(articleSearch)
-            }
+        
     }
+    //look into issue of db not retrieving to correct range of dates
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -256,4 +250,3 @@ const SearchArticle = () => {
     )
 }
 export default SearchArticle
- 

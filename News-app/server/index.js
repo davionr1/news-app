@@ -21,37 +21,17 @@ app.use((req, res, next) => {
   next();
 })
 
-
 app.get('/search', async (req, res) => {
-
   const { q, fromDate, toDate } = req.query
 
-  console.log(q, fromDate, toDate);
-
-  if (fromDate && toDate) {
-    articleModel.searchArticles(q, fromDate, toDate)
-      .then(response => {
-        res.status(200).send(response)
-        console.log(response, "dates and stuff");
-      })
-      .catch(error => {
-        res.status(500).send(error)
-      })
-  }
-
-  else {
-    articleModel.searchArticles(q)
-      .then(response => {
-        res.status(200).send(response)
-        console.log(response, "else state");
-
-      })
-      .catch(error => {
-
-        res.status(500).send(error)
-      })
-
-  }
+  articleModel.searchArticles(q, fromDate, toDate)
+    .then(response => {
+      res.status(200).send(response)
+      console.log(response, "dates and stuff");
+    })
+    .catch(error => {
+      res.status(500).send(error)
+    })
 })
 
 app.get('/makeArticles', async (req, res) => {
