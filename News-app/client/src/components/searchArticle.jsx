@@ -23,24 +23,29 @@ const SearchArticle = () => {
     const endpoint = ['top-headlines', 'everything']
     const defaultValueEndpoint = 'top-headlines'
     const defaultValueSortBy = 'publishedAt'
-
+    const page = 1
+    const pageSize = 100
+    
     const getSearchResults = async () => {
         //retrieve api data from user input
         const apiResponse = await fetch(
-            `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&apiKey=${api_key}${firstDate & secondDate ? `&from=${firstDate}` : ''} ${firstDate & secondDate ? `&to=${secondDate}` : ''}`)
+            `https://newsapi.org/v2/${searchEndpoint ? `${searchEndpoint}` : `${defaultValueEndpoint}`}?q=${(articleSearch)}&sortBy=${sortBy ? `${sortBy}` : `${defaultValueSortBy}`}&page=${page}&pageSize=${pageSize}&apiKey=${api_key}${firstDate && secondDate ? `&from=${firstDate}&to=${secondDate}` : ''}`);
         const apiData = await apiResponse.json()
 
         const DBresponse = await fetch(`http://localhost:4000/search?q=${articleSearch}${firstDate && secondDate ? `&fromDate=${firstDate}` : ''} ${firstDate && secondDate ? `&toDate=${secondDate}` : ''}`);
         const DBdata = await DBresponse.json();
+        const DBresponseAll = await fetch(`http://localhost:4000/search?q=${articleSearch}`);
+        const DBdataAll = await DBresponseAll.json();
         //call a function in the dbdata conditional statement for a function that sets data to jsx without apidata or newdata
-        const newData = GetDifferenceOfNewEntries(DBdata, apiData)
+        const newData = GetDifferenceOfNewEntries(DBdataAll, apiData)
 
         console.log("db", DBdata);
+        console.log("dbAll", DBdataAll);
         console.log("api", apiData);
         console.log("the dif", newData);
 
         //if theres no data in db
-        if (!DBdata || DBdata.length === 0) {
+        if (!DBdataAll || DBdataAll.length === 0) {
 
             try {
                 console.log("make data if not data in db");
@@ -48,7 +53,7 @@ const SearchArticle = () => {
                     //triggers a query to add data in db then set data from api data
                     const makeData = await fetch(`http://localhost:4000/makeArticles?q=${encodeURIComponent(articleSearch)}`)
                 }
-                setArticleData(apiData.articles)
+                setArticleData(apiData.articles || [])
                 setSearchedArticle(articleSearch)
             }
             //catch if theres an error, most likely an due to too much data moving to backend
@@ -63,7 +68,7 @@ const SearchArticle = () => {
                         console.log("error in splitdata:");
                     }
                 }
-                setArticleData(DBdata)
+                setArticleData(DBdataAll)
                 setSearchedArticle(articleSearch)
             }
         }
@@ -90,12 +95,18 @@ const SearchArticle = () => {
         }
         console.log("last output");
         //outputs on the screen the combined data of the db and new data
-
-            console.log(DBdata, "y");
-            setArticleData(DBdata)
+        if(firstDate && secondDate){
+            
+            setArticleData([...DBdata])
             setSearchedArticle(articleSearch)
-            console.log("null")
-        
+        }
+        else{
+           
+            setArticleData(DBdataAll);
+            setSearchedArticle(articleSearch)
+        }
+       
+
     }
     //look into issue of db not retrieving to correct range of dates
 
@@ -119,12 +130,14 @@ const SearchArticle = () => {
 
     useEffect(() => {
         try {
+            getSearchResults()
             checkDateInput()
+            setSearchedArticle(articleSearch)
         }
         catch (error) {
             console.log(error);
         }
-    }, [firstDate, secondDate])
+    }, [firstDate, secondDate, searchedArticle])
 
     const checkDateInput = () => {
 
