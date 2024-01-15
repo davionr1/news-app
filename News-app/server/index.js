@@ -22,9 +22,9 @@ app.use((req, res, next) => {
 })
 
 app.get('/search', async (req, res) => {
-  const { q, fromDate, toDate } = req.query
-
-  articleModel.searchArticles(q, fromDate, toDate)
+  const { q, fromDate, toDate, page, pageSize } = req.query
+  console.log(fromDate, toDate, "routes");
+  articleModel.searchArticles(q, fromDate, toDate, page, pageSize)
     .then(response => {
       res.status(200).send(response)
       console.log(response, "dates and stuff");

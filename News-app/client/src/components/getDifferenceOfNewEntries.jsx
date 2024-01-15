@@ -1,6 +1,6 @@
 
 export const GetDifferenceOfNewEntries = (DBdataAll, apiData) => {
-    console.log("tester", DBdataAll, apiData);
+    console.log("tester", DBdataAll, "testy",apiData.articles);
     //looks through db and api for data thats not in db and stores into newdata variable
     try {
         const existingTitles = DBdataAll.map((data) => data.title);

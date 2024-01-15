@@ -4,7 +4,7 @@ import NewsItem from './newsItem';
 import './calendar.css'
 import { GetDifferenceOfNewEntries } from './getDifferenceOfNewEntries';
 import { splitData } from './splitData'
-import { Pagination } from './pagination';
+
 const api_key = import.meta.env.VITE_KEY
 
 const SearchArticle = () => {
@@ -18,18 +18,19 @@ const SearchArticle = () => {
     const [secondDate, setSecondDate] = useState('')
     const [validFirstDate, setFirstValidDate] = useState(true)
     const [validSecondDate, setSecondValidDate] = useState(true)
-    const [formSubmitted, setFormSubmitted] = useState(false)
-    const [totalPages, setTotalPages] = useState(1)
     const [currentPage, setCurrentPage] = useState(1)
-    const [dataAll, setDataAll] = useState('')
-    const [data, setData] = useState('')
-
+    const [totalPage, setTotalPage] = useState(1)
+    const [formSubmitted, setFormSubmitted] = useState(false)
     const pageSize = 5
 
     const sort = ['publishedAt', 'relevancy', 'popularity']
     const endpoint = ['top-headlines', 'everything']
     const defaultValueEndpoint = 'top-headlines'
     const defaultValueSortBy = 'publishedAt'
+    //look into this
+    const lastPostIndex = currentPage * pageSize;
+    const firstPostIndex = lastPostIndex - pageSize;
+
 
     const getSearchResults = async () => {
         //retrieve api data from user input
@@ -41,15 +42,10 @@ const SearchArticle = () => {
         const DBdata = await DBresponse.json();
         const DBresponseAll = await fetch(`http://localhost:4000/search?q=${articleSearch}&page=${currentPage}&pageSize=${pageSize}`);
         const DBdataAll = await DBresponseAll.json();
-        const { totalCountResult, articles: newsArticles, pagination } = DBdataAll
-        
-        //fix the issue of dbdata not showing becuase i set the data to be outputted as dbdataall
-        setDataAll(DBdataAll)
-        setData(DBdata)
-        renderStates(firstDate, secondDate, DBdata, DBdataAll, articleSearch, newsArticles, pagination)
 
-        //get difference of data to add new data in db
-        const newData = GetDifferenceOfNewEntries(DBdataAll.articles, apiData)
+        renderStates(firstDate, secondDate, DBdata, DBdataAll, articleSearch)
+        //call a function in the dbdata conditional statement for a function that sets data to jsx without apidata or newdata
+        const newData = GetDifferenceOfNewEntries(DBdataAll, apiData)
 
         console.log("db", DBdata);
         console.log("dbAll", DBdataAll);
@@ -57,7 +53,7 @@ const SearchArticle = () => {
         console.log("the dif", newData);
 
         //if theres no data in db
-        if (!DBdataAll.articles || DBdataAll.articles.length === 0) {
+        if (!DBdataAll || DBdataAll.length === 0) {
 
             try {
                 console.log("make data if not data in db");
@@ -80,8 +76,7 @@ const SearchArticle = () => {
                         console.log("error in splitdata:");
                     }
                 }
-                setArticleData(DBdata.articles)
-                setTotalPages(pagination.totalPages)
+                setArticleData(DBdataAll)
                 setSearchedArticle(articleSearch)
             }
         }
@@ -105,38 +100,24 @@ const SearchArticle = () => {
                 }
             }
         }
-        
         console.log("last output");
     }
     //outputs on the screen the combined data of the db and new data
 
 
-    const renderStates = async (firstDate, secondDate, DBdata, DBdataAll, articleSearch, pagination, ) => {
+    const renderStates = async (firstDate, secondDate, DBdata, DBdataAll, articleSearch) => {
+        console.log("test", DBdataAll, DBdataAll.totalPage);
         if (firstDate && secondDate) {
-            setArticleData(DBdata.articles)
-            setTotalPages(pagination.totalPages)
+            setArticleData(DBdata)
+            // setTotalPage(DBdata.totalPage || 0)
             setSearchedArticle(articleSearch)
         }
         else {
-            setArticleData(DBdataAll.articles)
-            setTotalPages(pagination.totalPages)
+            setArticleData(DBdataAll);
+            // setTotalPage(DBdataAll.totalPage || 0)
             setSearchedArticle(articleSearch)
         }
     }
-
-    useEffect(() => {
-        try {
-            if (setFormSubmitted) {
-                checkDateInput()
-                setSearchedArticle(articleSearch)
-                setFormSubmitted(false)
-                getSearchResults()
-            }
-        }
-        catch (error) {
-            console.log(error);
-        }
-    }, [searchedArticle, currentPage])
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -157,9 +138,19 @@ const SearchArticle = () => {
         setSecondDate(e.target.value)
     }
 
-    const handlePageChange = (newPage) => {
-        setCurrentPage(newPage)
-    }
+    useEffect(() => {
+        try {
+            if (setFormSubmitted) {
+                checkDateInput()
+                setSearchedArticle(articleSearch)
+                setFormSubmitted(false)
+                renderStates()
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }, [searchedArticle, currentPage])
 
     const checkDateInput = () => {
         const dateFormatPattern = /^(198[0-9]|199[0-9]|200[0-9]|201[0-9]|202[0-4])[-](0[1-9]|[1][0-2])[-](0[1-9]|[12][0-9]|3[01])\s?$/
@@ -184,12 +175,11 @@ const SearchArticle = () => {
         dateFormatPattern.test(secondDate)
     }
 
-    const sortedArticle = articleData && Array.isArray(articleData)
-        ? articleData.sort((a, b) => {
-            const dateA = new Date(a.publishedAt || a.published_at || '')
-            const dateB = new Date(b.publishedAt || b.published_at || '')
-            return dateB - dateA;
-        }) : [];
+    const sortedArticle = articleData.sort((a, b) => {
+        const dateA = new Date(a.publishedAt || a.published_at || '')
+        const dateB = new Date(b.publishedAt || b.published_at || '')
+        return dateB - dateA;
+    })
 
     return (
         <>
@@ -282,7 +272,17 @@ const SearchArticle = () => {
                     </div>
                 )}
                 {searchedArticle && (
-                    <Pagination dataAll={dataAll} data={data} firstDate={firstDate} secondDate={secondDate} currentPage={currentPage} onPageChange={handlePageChange} />
+                    <footer>
+                        <div className='navigation'>
+                            <button onClick={() => setCurrentPage(currentPage - 1)} {...window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })} disabled={currentPage === 1}>
+                                Prev
+                            </button>
+                            <div className='page'>{`Page ${currentPage} of ${totalPage}`}</div>
+                            <button onClick={() => setCurrentPage(currentPage + 1)} {...window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })} disabled={currentPage === totalPage}>
+                                Next
+                            </button>
+                        </div>
+                    </footer>
                 )}
             </div>
         </>

@@ -13,28 +13,48 @@ sequelize.sync().then(() => {
   console.log('Database is synced. ');
 });
 
-const searchArticles = async (q, fromDate, toDate) => {
+const searchArticles = async (q, fromDate, toDate, page, pageSize) => {
   try {
-    const searchTerm = `%${q}%`
-    const from = fromDate
-    const to = toDate
-    let query;
 
+    const offset = (page - 1) * pageSize;
+    const endIndex = page * pageSize
+
+    const searchTerm = `%${q}%`;
+    const from = fromDate;
+    const to = toDate;
+    let query;
+    let countQuery;
+
+    console.log("test", fromDate, toDate);
     if (!from && !to) {
       // Query with date range condition
       query = `
-        SELECT *
-        FROM articles
-        WHERE (
-          (title ILIKE '%${searchTerm}%'
-            OR content ILIKE '%${searchTerm}%'
-            OR description ILIKE '%${searchTerm}%'
-            OR author ILIKE '%${searchTerm}%'
-            OR source_id ILIKE '%${searchTerm}%'
-            OR source_name ILIKE '%${searchTerm}%')
-            )`;
+    SELECT *
+    FROM articles
+    WHERE (
+      (title ILIKE '%${searchTerm}%'
+        OR content ILIKE '%${searchTerm}%'
+        OR description ILIKE '%${searchTerm}%'
+        OR author ILIKE '%${searchTerm}%'
+        OR source_id ILIKE '%${searchTerm}%'
+        OR source_name ILIKE '%${searchTerm}%')
+    )
+    ORDER BY published_at DESC
+     LIMIT ${pageSize}
+     OFFSET ${offset}`;
+
+      countQuery = `SELECT COUNT(*) as totalCount FROM articles 
+    WHERE(
+      title ILIKE '%${searchTerm}%'
+        OR content ILIKE '%${searchTerm}%'
+        OR description ILIKE '%${searchTerm}%'
+        OR author ILIKE '%${searchTerm}%'
+        OR source_id ILIKE '%${searchTerm}%'
+        OR source_name ILIKE '%${searchTerm}%'
+      )`;
     }
     else if (from && to) {
+      console.log("workinggggg");
       // Query without date range condition
       query = `
         SELECT *
@@ -48,25 +68,53 @@ const searchArticles = async (q, fromDate, toDate) => {
           OR (source_name) ILIKE '%${searchTerm}%'
           )
           AND published_at BETWEEN '${from}' AND '${to}'
-          `;
+           ORDER BY published_at DESC
+           LIMIT ${endIndex}
+           OFFSET ${offset}`;
+
+      countQuery = `
+           SELECT COUNT(*) as totalCount
+           FROM articles
+           WHERE (
+            (title) ILIKE '%${searchTerm}%'
+            OR (content) ILIKE '%${searchTerm}%'
+            OR (description) ILIKE '%${searchTerm}%'
+            OR (author) ILIKE '%${searchTerm}%'
+            OR (source_id) ILIKE '%${searchTerm}%'
+            OR (source_name) ILIKE '%${searchTerm}%'
+            )
+            AND published_at BETWEEN '${from}' AND '${to}'
+             `;
     }
 
-    const [rows] = await sequelize.query(query, { replacements: { searchTerm, from, to } });
 
+    const [rows] = await sequelize.query(query, { replacements: { searchTerm, from, to, endIndex, pageSize, offset } });
+
+    const [countResults] = await sequelize.query(countQuery, { replacements: { searchTerm, from, to } });
+
+    const totalCount = countResults[0].totalcount;
+    
+    //check back here
     if (rows.length > 0) {
+      const totalPages = Math.ceil(totalCount / pageSize)
+
+      console.log("llllll", totalCount, pageSize, totalPages);
+
+      const pagination = { page, pageSize, totalPages, totalCount }
       console.log("Data found in the database");
-      return rows
+      return { articles: rows, pagination }
+
     }
 
     else {
       console.log("No data found in the database");
-      return [];
+      return { articles: [], pagination: {} };
     }
 
   }
   catch (error) {
     console.error("Error in searchArticles:", error);
-    return [];
+    return { articles: [], pagination: {} };
   }
 }
 
